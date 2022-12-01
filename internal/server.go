@@ -92,7 +92,7 @@ func (s *Server) AuthHandler(providerName, rule string) http.HandlerFunc {
 		}
 
 		// Validate cookie
-		email, err := ValidateCookie(r, c)
+		email, name, id, err := ValidateCookie(r, c)
 		if err != nil {
 			if err.Error() == "Cookie has expired" {
 				logger.Info("Cookie has expired")
@@ -114,7 +114,9 @@ func (s *Server) AuthHandler(providerName, rule string) http.HandlerFunc {
 
 		// Valid request
 		logger.Debug("Allowing valid request")
-		w.Header().Set("X-Forwarded-User", email)
+		w.Header().Set("X-Forwarded-Email", email)
+		w.Header().Set("X-Forwarded-User", id)
+		w.Header().Set("X-Forwarded-Name", name)
 		w.WriteHeader(200)
 	}
 }
@@ -186,11 +188,13 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 		}
 
 		// Generate cookie
-		http.SetCookie(w, MakeCookie(r, user.Email))
+		http.SetCookie(w, MakeCookie(r, user.Email, user.Name, user.Id))
 		logger.WithFields(logrus.Fields{
 			"provider": providerName,
 			"redirect": redirect,
-			"user":     user.Email,
+			"email":     user.Email,
+			"name": 	user.Name,
+			"id": 	user.Id,
 		}).Info("Successfully generated auth cookie, redirecting user.")
 
 		// Redirect
