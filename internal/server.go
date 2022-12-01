@@ -117,6 +117,7 @@ func (s *Server) AuthHandler(providerName, rule string) http.HandlerFunc {
 		w.Header().Set("X-Forwarded-Email", email)
 		w.Header().Set("X-Forwarded-User", id)
 		w.Header().Set("X-Forwarded-Name", name)
+		w.Header().Set("X-Forwarded-Provider", providerName)
 		w.WriteHeader(200)
 	}
 }
