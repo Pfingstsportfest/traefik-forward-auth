@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  whoami2:
+    image: emilevauge/whoami
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+      - 'traefik.http.services.whoami.loadbalancer.server.port=80'
+      - "traefik.http.middlewares.whoami-auth.forwardauth.address=http://traefik-forward-auth:4181"
+      - "traefik.http.middlewares.whoami-auth.forwardauth.authResponseHeaders=X-Forwarded-User"
+      - "traefik.http.routers.whoami.middlewares=whoami-auth"
+
+  traefik-forward-auth:
+    build: ../
+    environment:
+      - PROVIDERS_GOOGLE_CLIENT_ID=136661812926-o9etmqhhjv0m7sr8497t2soj1v0pcp38.apps.googleusercontent.com
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=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
+      - SECRET=something-random
+      - INSECURE_COOKIE=true
+      - COOKIE_DOMAIN=localhost
+      - LOG_LEVEL=debug
+    networks:
+      - traefik
+
+networks:
+  traefik:
