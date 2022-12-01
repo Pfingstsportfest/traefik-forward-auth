@@ -33,8 +33,8 @@ services:
   traefik-forward-auth:
     build: ../
     environment:
-      - PROVIDERS_GOOGLE_CLIENT_ID=136661812926-o9etmqhhjv0m7sr8497t2soj1v0pcp38.apps.googleusercontent.com
-      - PROVIDERS_GOOGLE_CLIENT_SECRET=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
+      - PROVIDERS_GOOGLE_CLIENT_ID=CLIENT_ID
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=CLIENT_SECRET
       - SECRET=something-random
       - INSECURE_COOKIE=true
       - COOKIE_DOMAIN=localhost
